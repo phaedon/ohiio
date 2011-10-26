@@ -1,0 +1,23 @@
+Ohiio: A set of Haskell bindings for OpenImageIO
+Phaedon Sinis
+Stanford University
+Fall 2011
+
+
+Introduction
+------------
+"OpenImageIO is a library for reading and writing images, and a bunch of 
+ related classes, utilities, and applications."
+
+For more information:
+https://sites.google.com/site/openimageio/home
+https://github.com/OpenImageIO/oiio
+
+
+From OIIO to Ohiio
+------------------
+OIIO is wonderfully versatile, handles many image formats, and emphasizes
+performance. In addition, it is released under the BSD license.
+
+The goal of this project is to access the power and speed of OIIO from Haskell.
+
