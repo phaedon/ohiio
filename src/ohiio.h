@@ -64,27 +64,99 @@ extern "C" {
     
     size_t ImageSpec_channel_bytes_0 (const ImageSpec *imageSpec);
     
-    size_t ImageSpec_channel_bytes_1 (ImageSpec *imageSpec,
+    size_t ImageSpec_channel_bytes_1 (const ImageSpec *imageSpec,
                                       int chan, bool native=false);
     
-    size_t ImageSpec_pixel_bytes_0 (ImageSpec *imageSpec, bool native=false);
+    size_t ImageSpec_pixel_bytes_0 (const ImageSpec *imageSpec, bool native=false);
     
-    size_t ImageSpec_pixel_bytes_1 (ImageSpec *imageSpec,
+    size_t ImageSpec_pixel_bytes_1 (const ImageSpec *imageSpec,
                                     int firstchan, int nchans, bool native=false);
     
-    imagesize_t ImageSpec_scanline_bytes (ImageSpec *imageSpec, bool native=false);
+    imagesize_t ImageSpec_scanline_bytes (const ImageSpec *imageSpec, bool native=false);
     
-    imagesize_t ImageSpec_tile_pixels (ImageSpec *imageSpec);
+    imagesize_t ImageSpec_tile_pixels (const ImageSpec *imageSpec);
     
-    imagesize_t ImageSpec_tile_bytes (ImageSpec *imageSpec, bool native=false);
+    imagesize_t ImageSpec_tile_bytes (const ImageSpec *imageSpec, bool native=false);
     
-    imagesize_t ImageSpec_image_pixels (ImageSpec *imageSpec);
+    imagesize_t ImageSpec_image_pixels (const ImageSpec *imageSpec);
     
-    imagesize_t ImageSpec_image_bytes (ImageSpec *imageSpec, bool native=false);
+    imagesize_t ImageSpec_image_bytes (const ImageSpec *imageSpec, bool native=false);
     
-    bool ImageSpec_size_t_safe(ImageSpec *imageSpec);
+    bool ImageSpec_size_t_safe(const ImageSpec *imageSpec);
 
+    void ImageSpec_auto_stride_0 (ImageSpec *imageSpec,
+                                  stride_t &xstride, stride_t &ystride,
+                             stride_t &zstride, stride_t channelsize,
+                             int nchannels, int width, int height);
+    
+    void ImageSpec_auto_stride_1 (ImageSpec *imageSpec,
+                                  stride_t &xstride, stride_t &ystride,
+                             stride_t &zstride, TypeDesc format,
+                      int nchannels, int width, int height);
+    
+    void ImageSpec_auto_stride_2 (ImageSpec *imageSpec,
+                                  stride_t &xstride, TypeDesc format, int nchannels);
+    
+    void ImageSpec_attribute_0 (ImageSpec *imageSpec,
+                                const std::string &name, TypeDesc type, const void *value);
+    
+    void ImageSpec_attribute_1 (ImageSpec *imageSpec,
+                                const std::string &name, TypeDesc type, const std::string &value);
+    
+    void ImageSpec_attribute_2 (ImageSpec *imageSpec,
+                                const std::string &name, unsigned int value);
+    
+    void ImageSpec_attribute_3 (ImageSpec *imageSpec,
+                                const std::string &name, int value);
+    
+    void ImageSpec_attribute_4 (ImageSpec *imageSpec,
+                                const std::string &name, float value);
+    
+    void ImageSpec_attribute_5 (ImageSpec *imageSpec,
+                                const std::string &name, const char *value);
+    
+    void ImageSpec_attribute_6 (ImageSpec *imageSpec,
+                                const std::string &name, const std::string &value);
+    
+    void ImageSpec_erase_attribute (ImageSpec *imageSpec,
+                                    const std::string &name,
+                          TypeDesc searchtype=TypeDesc::UNKNOWN,
+                          bool casesensitive=false);
 
+    ImageIOParameter * find_attribute (ImageSpec *imageSpec,
+                                       const std::string &name,
+                                       TypeDesc searchtype=TypeDesc::UNKNOWN,
+                                       bool casesensitive=false);
+    
+    const ImageIOParameter *ImageSpec_find_attribute (const ImageSpec *imageSpec,
+                                                      const std::string &name,
+                                            TypeDesc searchtype=TypeDesc::UNKNOWN,
+                                            bool casesensitive=false);
+    
+    int ImageSpec_get_int_attribute (const ImageSpec *imageSpec,
+                                     const std::string &name, int defaultval=0);
+    
+    float ImageSpec_get_float_attribute (const ImageSpec *imageSpec,
+                                         const std::string &name,
+                               float defaultval=0);
+    
+    const char * ImageSpec_get_string_attribute (const ImageSpec *imageSpec,
+                                                const std::string &name,
+                                      const std::string &defaultval = std::string());
+    
+    const char * ImageSpec_metadata_val (const ImageSpec *imageSpec,
+                                        const ImageIOParameter &p,
+                              bool human=false);
+    
+    const char * ImageSpec_to_xml (const ImageSpec *imageSpec);
+
+    void ImageSpec_from_xml (ImageSpec *imageSpec,
+                             const char *xml);
+    
+    bool ImageSpec_valid_tile_range (ImageSpec *imageSpec,
+                                     int xbegin, int xend, int ybegin, int yend,
+                                     int zbegin, int zend);
+    
     
     
     /****************************

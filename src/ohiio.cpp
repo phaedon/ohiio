@@ -83,47 +83,162 @@ size_t ImageSpec_channel_bytes_0 (const ImageSpec *imageSpec) {
 }
 
 
-size_t ImageSpec_channel_bytes_1 (ImageSpec *imageSpec,
+size_t ImageSpec_channel_bytes_1 (const ImageSpec *imageSpec,
                                   int chan, bool native) {
     return imageSpec->channel_bytes(chan, native);
 }
 
-size_t ImageSpec_pixel_bytes_0 (ImageSpec *imageSpec,
+size_t ImageSpec_pixel_bytes_0 (const ImageSpec *imageSpec,
                                 bool native) {
     return imageSpec->pixel_bytes(native);
 }
 
-size_t ImageSpec_pixel_bytes_1 (ImageSpec *imageSpec,
+size_t ImageSpec_pixel_bytes_1 (const ImageSpec *imageSpec,
                                 int firstchan, int nchans, bool native) {
     return imageSpec->pixel_bytes(firstchan, nchans, native);
 }
 
-OpenImageIO::imagesize_t ImageSpec_scanline_bytes (ImageSpec *imageSpec,
+imagesize_t ImageSpec_scanline_bytes (const ImageSpec *imageSpec,
                                                    bool native) {
     return imageSpec->scanline_bytes(native);
 }
 
-OpenImageIO::imagesize_t ImageSpec_tile_pixels (ImageSpec *imageSpec) {
+imagesize_t ImageSpec_tile_pixels (const ImageSpec *imageSpec) {
     return imageSpec->tile_pixels();
 }
 
-OpenImageIO::imagesize_t ImageSpec_tile_bytes (ImageSpec *imageSpec,
+imagesize_t ImageSpec_tile_bytes (const ImageSpec *imageSpec,
                                                bool native) {
     return imageSpec->tile_bytes(native);
 }
 
-OpenImageIO::imagesize_t ImageSpec_image_pixels (ImageSpec *imageSpec) {
+imagesize_t ImageSpec_image_pixels (const ImageSpec *imageSpec) {
     return imageSpec->image_pixels();
 }
 
-OpenImageIO::imagesize_t ImageSpec_image_bytes (ImageSpec *imageSpec,
+imagesize_t ImageSpec_image_bytes (const ImageSpec *imageSpec,
                                                 bool native) {
     return imageSpec->image_bytes(native);
 }
 
-bool ImageSpec_size_t_safe(OpenImageIO::ImageSpec *imageSpec) {
+bool ImageSpec_size_t_safe(const ImageSpec *imageSpec) {
     return imageSpec->size_t_safe();
 }
+
+
+void ImageSpec_auto_stride_0 (ImageSpec *imageSpec,
+                              stride_t &xstride, stride_t &ystride,
+                              stride_t &zstride, stride_t channelsize,
+                              int nchannels, int width, int height) {
+    imageSpec->auto_stride(xstride, ystride, zstride, channelsize, nchannels, width, height);
+}
+
+void ImageSpec_auto_stride_1 (ImageSpec *imageSpec,
+                              stride_t &xstride, stride_t &ystride,
+                              stride_t &zstride, TypeDesc format,
+                              int nchannels, int width, int height) {
+    imageSpec->auto_stride(xstride, ystride, zstride, format, nchannels, width, height);
+}
+
+void ImageSpec_auto_stride_2 (ImageSpec *imageSpec,
+                              stride_t &xstride, TypeDesc format, int nchannels) {
+    imageSpec->auto_stride(xstride, format, nchannels);
+}
+
+void ImageSpec_attribute_0 (ImageSpec *imageSpec,
+                            const std::string &name, TypeDesc type, const void *value) {
+    imageSpec->attribute(name, type, value);
+}
+
+void ImageSpec_attribute_1 (ImageSpec *imageSpec,
+                            const std::string &name, TypeDesc type, const std::string &value) {
+    imageSpec->attribute(name, type, value);
+}
+
+void ImageSpec_attribute_2 (ImageSpec *imageSpec,
+                            const std::string &name, unsigned int value) {
+    imageSpec->attribute(name, value);
+}
+
+void ImageSpec_attribute_3 (ImageSpec *imageSpec,
+                            const std::string &name, int value) {
+    imageSpec->attribute(name, value);
+}
+
+void ImageSpec_attribute_4 (ImageSpec *imageSpec,
+                            const std::string &name, float value) {
+    imageSpec->attribute(name, value);
+}
+
+void ImageSpec_attribute_5 (ImageSpec *imageSpec,
+                            const std::string &name, const char *value) {
+    imageSpec->attribute(name, value);
+}
+
+void ImageSpec_attribute_6 (ImageSpec *imageSpec,
+                            const std::string &name, const std::string &value) {
+    imageSpec->attribute(name, value);
+}
+
+void ImageSpec_erase_attribute (ImageSpec *imageSpec,
+                                const std::string &name,
+                                TypeDesc searchtype,
+                                bool casesensitive) {
+    imageSpec->erase_attribute(name, searchtype, casesensitive);
+}
+
+ImageIOParameter * find_attribute (ImageSpec *imageSpec,
+                                   const std::string &name,
+                                   TypeDesc searchtype,
+                                   bool casesensitive) {
+    return imageSpec->find_attribute(name, searchtype, casesensitive);
+}
+
+const ImageIOParameter *ImageSpec_find_attribute (const ImageSpec *imageSpec,
+                                                  const std::string &name,
+                                                  TypeDesc searchtype,
+                                                  bool casesensitive) {
+    return imageSpec->find_attribute(name, searchtype, casesensitive);
+}
+
+int ImageSpec_get_int_attribute (const ImageSpec *imageSpec,
+                                 const std::string &name, int defaultval) {
+    return imageSpec->get_int_attribute(name, defaultval);
+}
+
+float ImageSpec_get_float_attribute (const ImageSpec *imageSpec,
+                                     const std::string &name,
+                                     float defaultval) {
+    return imageSpec->get_float_attribute(name, defaultval);
+}
+
+const char * ImageSpec_get_string_attribute (const ImageSpec *imageSpec,
+                                            const std::string &name,
+                                            const std::string &defaultval) {
+    return imageSpec->get_string_attribute(name, defaultval).c_str();
+}
+
+const char * ImageSpec_metadata_val (const ImageSpec *imageSpec,
+                                    const ImageIOParameter &p,
+                                    bool human) {
+    return imageSpec->metadata_val(p, human).c_str();
+}
+
+const char * ImageSpec_to_xml (const ImageSpec *imageSpec) {
+    return imageSpec->to_xml().c_str();
+}
+
+void ImageSpec_from_xml (ImageSpec *imageSpec,
+                         const char *xml) {
+    imageSpec->from_xml(xml);
+}
+
+bool ImageSpec_valid_tile_range (ImageSpec *imageSpec,
+                                 int xbegin, int xend, int ybegin, int yend,
+                                 int zbegin, int zend) {
+    return imageSpec->valid_tile_range(xbegin, xend, ybegin, yend, zbegin, zend);
+}
+
 
 
 
