@@ -5,15 +5,15 @@ module Ohiio where
 import Foreign
 import Foreign.C.Types
 import Foreign.C.String
+import Data.Word
 
 #include "./ohiio.h"
 
-data ImageSpec
-data ImageInput
-data ImageOutput
-data TypeDesc
+data ImageSpec = ImageSpec
+data ImageInput = ImageInput
+data ImageOutput = ImageOutput
+data TypeDesc = TypeDesc
 
-data Void -- ????
 
 newtype OpenMode = OpenMode { mode :: CInt }
 #{enum OpenMode, OpenMode,
@@ -51,19 +51,19 @@ newtype BaseType = BaseType { btype :: CInt }
 } 
 
 foreign import ccall "ImageSpecCreate_1"
-        c_ImageSpecCreate :: CInt -> CInt -> CInt -> Ptr TypeDesc -> Ptr ImageSpec
+        c_ImageSpecCreate :: CInt -> CInt -> CInt -> Ptr TypeDesc -> IO (Ptr ImageSpec)
 
 
 
 foreign import ccall "ImageOutputCreate"
 --        c_ImageOutputCreate :: Ptr CChar -> Ptr CChar -> Ptr ImageOutput
-        c_ImageOutputCreate :: CString -> CString -> Ptr ImageOutput
+        c_ImageOutputCreate :: CString -> CString -> IO (Ptr ImageOutput)
 
-foreign import ccall "ImageOutput_open"
-        c_ImageOutput_open :: Ptr ImageOutput -> Ptr CChar -> Ptr ImageSpec -> OpenMode -> Bool
+foreign import ccall unsafe "ImageOutput_open"
+        c_ImageOutput_open :: Ptr ImageOutput -> Ptr CChar -> Ptr ImageSpec -> OpenMode -> IO Bool
 
-foreign import ccall "ImageOutput_close"
-        c_ImageOutput_close :: Ptr ImageOutput -> Bool
+foreign import ccall unsafe "ImageOutput_close"
+        c_ImageOutput_close :: Ptr ImageOutput -> IO Bool
 
-foreign import ccall "ImageOutput_write_image_0"
-        c_ImageOutput_write_image :: Ptr ImageOutput -> BaseType -> Ptr Void -> Bool
+foreign import ccall unsafe "ImageOutput_write_image_0"
+        c_ImageOutput_write_image :: Ptr ImageOutput -> BaseType -> Ptr Word8 -> IO Bool

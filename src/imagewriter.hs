@@ -5,9 +5,42 @@ import Foreign.C.Types
 import Foreign.C.String
 import Foreign.Marshal.Alloc
 import System.IO.Unsafe
+import Foreign.Storable -- for poking
+import Data.Word
+import Data.Bits
 
 mkCInt :: Int -> CInt
 mkCInt n = fromIntegral n
+
+imageFn :: (Int, Int) -> Word32
+imageFn (x, y) = color
+        where
+        x10 = even $ x `div` 10
+        y10 = even $ y `div` 10
+        red = shiftL 255 0
+        green = shiftL 255 8
+        blue = shiftL 255 16
+        black = 0
+        alpha = shiftL 100 24
+       
+        color = if (x10 && y10) || (not x10 && not y10)
+              then red .|. alpha
+              else blue .|. green .|. alpha
+
+
+poker :: Ptr Word8 -> ( (Int, Int) -> Word32 ) -> (Int, Int) -> (Int, Int) -> IO ()
+poker ptr imgFun (xres, yres) (x, y) = 
+      pokeByteOff ptr (4 * (y * xres + x)) (imgFun (x, y))
+
+
+initImage :: Ptr Word8 -> Int -> Int -> IO ()
+initImage ptr xres yres = do
+
+          let allCoords = [ (x, y) | x <- [0..xres-1], y <- [0..yres-1] ]
+          let myPoker = poker ptr imageFn (xres, yres)
+          
+          foldr (>>) (return ()) (map myPoker allCoords)
+
 
 writeImage :: Int -> Int -> String -> IO Bool
 writeImage xres yres name = do
@@ -17,23 +50,25 @@ writeImage xres yres name = do
            uempty <- newCString ""
            
            -- allocate some memory
-           let memSize = xres * yres * 8 * 3 
+           let memSize = xres * yres * 8 * 4
            mem <- mallocBytes memSize
 
+           initImage mem xres yres
+
            -- create an ImageSpec object
-           spec <- return $ c_ImageSpecCreate (mkCInt xres) (mkCInt yres) (3::CInt) nullPtr
+           spec <- c_ImageSpecCreate (mkCInt xres) (mkCInt yres) (4::CInt) nullPtr
            
            -- create an ImageOutput object
-           outImg <- return $ c_ImageOutputCreate uname uempty
+           outImg <- c_ImageOutputCreate uname uempty
 
            -- open it in memory...
-           openbool <- return $ c_ImageOutput_open outImg uname spec create
+           openbool <- c_ImageOutput_open outImg uname spec create
            
            -- write the image to file
-           writebool <- return $ c_ImageOutput_write_image outImg uint8 mem
+           writebool <- c_ImageOutput_write_image outImg uint8 mem
 
            -- close the file
-           closebool <- return $ c_ImageOutput_close outImg
+           closebool <- c_ImageOutput_close outImg
 
            -- release mem
            free uname
@@ -41,3 +76,7 @@ writeImage xres yres name = do
            free mem
            
            return (closebool && writebool && openbool)
+
+
+main = do 
+     writeImage 640 480 "haskelltest.png" 

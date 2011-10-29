@@ -1,0 +1,17 @@
+Name:                ohiio
+Version:             0.1
+Author:              Phaedon Sinis
+Category:            Graphics
+Build-type:          Simple
+
+Cabal-version:       >=1.2
+
+
+Executable ohiio
+  Main-is:        imagewriter.hs
+  hs-source-dirs: src	
+  Build-depends:  base
+  Other-modules:  Ohiio
+  ghc-options:    -Wall 
+  extra-libraries: ohiio
+  extra-lib-dirs: /Users/phaedon/github/ohiio/ohiio/DerivedData/ohiio/Build/Products/Debug/ 
