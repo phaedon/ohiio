@@ -27,6 +27,8 @@
     //typedef struct QuantizationSpec QuantizationSpec;
 
     typedef ptrdiff_t stride_t;
+    typedef bool (*ProgressCallback)(void *opaque_data, float portion_done);
+
 
 /// Type we use to express how many pixels (or bytes) constitute an image,
 /// tile, or scanline.  Needs to be large enough to handle very big images
@@ -40,7 +42,12 @@ typedef unsigned long long imagesize_t;
 #endif // end CPLUSPLUS
 
 enum OpenMode { Create, AppendSubimage, AppendMIPLevel };
-
+enum BaseType { UNKNOWN, NONE, 
+    UCHAR, UINT8=UCHAR, CHAR, INT8=CHAR,
+    USHORT, UINT16=USHORT, SHORT, INT16=SHORT,
+    UINT, UINT32=UINT, INT, INT32=INT,
+    ULONGLONG, UINT64=ULONGLONG, LONGLONG, INT64=LONGLONG,
+    HALF, FLOAT, DOUBLE, STRING, PTR, LASTBASE };
 
 
 
@@ -94,14 +101,30 @@ extern "C" {
      *
      ****************************/
     
-    void ImageOutputCreate (ImageOutput **ioptr,
-                            const char *filename,
+    ImageOutput *ImageOutputCreate (const char *filename,
                             const char *plugin_searchpath);
         
     bool ImageOutput_open (ImageOutput *imageOutput,
                            const char *name, 
                            const ImageSpec *newspec,
                            enum OpenMode mode);
+    
+    bool ImageOutput_close (ImageOutput *imageOutput);
+    
+    // uses default args
+    bool ImageOutput_write_image_0 (ImageOutput *imageOutput,
+                                    enum BaseType basetype,
+                                    const void *data);
+    
+    bool ImageOutput_write_image_1 (ImageOutput *imageOutput,
+                                    enum BaseType basetype,
+                                    const void *data,
+                                    stride_t xstride,
+                                    stride_t ystride,
+                                    stride_t zstride,
+                                    ProgressCallback progress_callback,
+                                    void *progress_callback_data);
+    
 #ifdef __cplusplus   
 }
 #endif
