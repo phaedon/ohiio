@@ -33,6 +33,11 @@ ImageSpec *ImageSpecCreate_1 (int xres, int yres, int nchans,
     }
 }
 
+int ImageSpec_width(ImageSpec *ispec) { return ispec->width; }
+int ImageSpec_height(ImageSpec *ispec) {return ispec->height; }
+int ImageSpec_nchannels(ImageSpec *ispec) {return ispec->nchannels; }
+//TypeDesc *ImageSpec_format(ImageSpec *ispec);
+
 
 /****************************
  *
@@ -41,25 +46,35 @@ ImageSpec *ImageSpecCreate_1 (int xres, int yres, int nchans,
  ****************************/
 
 
-void ImageInputCreate (ImageInput **iiptr,
-                       char *filename,
-                       char *plugin_searchpath) {
-    *iiptr = ImageInput::create(filename, plugin_searchpath);
+ImageInput *ImageInputCreate (const char *filename,
+                              const char *plugin_searchpath) {
+    return ImageInput::create(filename, plugin_searchpath);
 }
 
 
-bool ImageInput_read_scanline (ImageInput *imageInput,
-                               int y, 
-                               int z, 
-                               float *data) {
-    
-    return imageInput->read_scanline (y, z, TypeDesc::FLOAT, data);
-    
+bool ImageInput_open (ImageInput *imageInput,
+                      const char *name, ImageSpec *newspec) {
+    return imageInput->open(name, *newspec);
 }
 
-bool ImageInput_read_image (ImageInput *imageInput, 
+bool ImageInput_close (ImageInput *imageInput) {
+    return imageInput->close();
+}
+
+
+/// Simple read_image reads to contiguous float pixels.
+bool ImageInput_read_image_0 (ImageInput *imageInput, 
+                              enum BaseType format,
+                              void *data) {
+    return imageInput->read_image (TypeDesc( (TypeDesc::BASETYPE) format), data);
+}
+
+
+
+/// Simple read_image reads to contiguous float pixels.
+bool ImageInput_read_image_1 (ImageInput *imageInput, 
                             float *data) {
-    return imageInput->read_image (TypeDesc::FLOAT, data);
+    return imageInput->read_image (data);
 }
 
 

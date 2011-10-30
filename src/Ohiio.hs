@@ -1,17 +1,17 @@
 {-# INCLUDE "./ohiio.h" #-}
-{-# LINE 1 "src/ohiio-test.hs" #-}
+{-# LINE 1 "src/bindings.hs" #-}
 {-# LANGUAGE CPP, ForeignFunctionInterface #-}
-{-# LINE 2 "src/ohiio-test.hs" #-}
+{-# LINE 2 "src/bindings.hs" #-}
 
 module Ohiio where
 
 import Foreign
 import Foreign.C.Types
 import Foreign.C.String
-import Data.Word
+--import Data.Word
 
 
-{-# LINE 11 "src/ohiio-test.hs" #-}
+{-# LINE 11 "src/bindings.hs" #-}
 
 data ImageSpec = ImageSpec
 data ImageInput = ImageInput
@@ -27,7 +27,7 @@ appendsubimage  = OpenMode 1
 appendmiplevel  :: OpenMode
 appendmiplevel  = OpenMode 2
 
-{-# LINE 24 "src/ohiio-test.hs" #-}
+{-# LINE 24 "src/bindings.hs" #-}
 
 newtype BaseType = BaseType { btype :: CInt }
 unknown  :: BaseType
@@ -79,15 +79,55 @@ ptr  = BaseType 14
 lastbase  :: BaseType
 lastbase  = BaseType 15
  
-{-# LINE 52 "src/ohiio-test.hs" #-}
-
-foreign import ccall "ImageSpecCreate_1"
-        c_ImageSpecCreate :: CInt -> CInt -> CInt -> Ptr TypeDesc -> IO (Ptr ImageSpec)
+{-# LINE 52 "src/bindings.hs" #-}
 
 
+{-
+ class ImageSpec
+-}
 
-foreign import ccall "ImageOutputCreate"
---        c_ImageOutputCreate :: Ptr CChar -> Ptr CChar -> Ptr ImageOutput
+foreign import ccall unsafe "ImageSpecCreate_0"
+        c_ImageSpecCreate_0 :: Ptr TypeDesc -> IO (Ptr ImageSpec)
+
+foreign import ccall unsafe "ImageSpecCreate_1"
+        c_ImageSpecCreate_1 :: CInt -> CInt -> CInt -> Ptr TypeDesc -> IO (Ptr ImageSpec)
+
+foreign import ccall unsafe "ImageSpec_width"
+        c_ImageSpec_width :: Ptr ImageSpec -> IO CInt
+
+foreign import ccall unsafe "ImageSpec_height"
+        c_ImageSpec_height :: Ptr ImageSpec -> IO CInt
+
+foreign import ccall unsafe "ImageSpec_nchannels"
+        c_ImageSpec_nchannels :: Ptr ImageSpec -> IO CInt
+
+
+{-
+ class ImageInput
+-}
+
+foreign import ccall unsafe "ImageInputCreate"
+        c_ImageInputCreate :: CString -> CString -> IO (Ptr ImageInput)
+
+foreign import ccall unsafe "ImageInput_open"
+        c_ImageInput_open :: Ptr ImageInput -> CString -> Ptr ImageSpec -> IO Bool
+
+foreign import ccall unsafe "ImageInput_close"
+        c_ImageInput_close :: Ptr ImageInput -> IO Bool
+
+foreign import ccall unsafe "ImageInput_read_image_0"
+        c_ImageInput_read_image_0 :: Ptr ImageInput -> BaseType -> Ptr Word8 -> IO Bool
+
+foreign import ccall unsafe "ImageInput_read_image_1"
+        c_ImageInput_read_image_1 :: Ptr ImageInput -> Ptr Float -> IO Bool
+
+
+{-
+ class ImageOutput
+-}
+
+
+foreign import ccall unsafe "ImageOutputCreate"
         c_ImageOutputCreate :: CString -> CString -> IO (Ptr ImageOutput)
 
 foreign import ccall unsafe "ImageOutput_open"

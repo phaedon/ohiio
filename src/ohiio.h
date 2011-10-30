@@ -71,6 +71,9 @@ extern "C" {
     ImageSpec *ImageSpecCreate_1 (int xres, int yres, int nchans, 
                           TypeDesc *fmt);
     
+    int ImageSpec_width(ImageSpec *ispec);
+    int ImageSpec_height(ImageSpec *ispec);
+    int ImageSpec_nchannels(ImageSpec *ispec);
     
     /****************************
      *
@@ -78,20 +81,26 @@ extern "C" {
      *
      ****************************/
     
-    void ImageInputCreate (ImageInput **iiptr,
-		       char *filename,
-		       char *plugin_searchpath);
+    ImageInput *ImageInputCreate (const char *filename,
+                                  const char *plugin_searchpath);
 
     
-    /// Simple read_scanline reads to contiguous float pixels.
-    bool ImageInput_read_scanline (ImageInput *imageInput,
-                                   int y, 
-                                   int z, 
-                                   float *data);
+    /// Open file with given name.  Various file attributes are put in
+    /// newspec and a copy is also saved in this->spec.  From these
+    /// attributes, you can discern the resolution, if it's tiled,
+    /// number of channels, and native data format.  Return true if the
+    /// file was found and opened okay.
+    bool ImageInput_open (ImageInput *imageInput,
+                          const char *name, ImageSpec *newspec);
+
+    bool ImageInput_close (ImageInput *imageInput);
     
-    ///
+    bool ImageInput_read_image_0 (ImageInput *imageInput, 
+                                  enum BaseType format,
+                                  void *data);
+    
     /// Simple read_image reads to contiguous float pixels.
-    bool ImageInput_read_image (ImageInput *imageInput, 
+    bool ImageInput_read_image_1 (ImageInput *imageInput, 
                                 float *data);
     
     
@@ -102,7 +111,7 @@ extern "C" {
      ****************************/
     
     ImageOutput *ImageOutputCreate (const char *filename,
-                            const char *plugin_searchpath);
+                                    const char *plugin_searchpath);
         
     bool ImageOutput_open (ImageOutput *imageOutput,
                            const char *name, 

@@ -4,10 +4,12 @@ import Foreign.Ptr
 import Foreign.C.Types
 import Foreign.C.String
 import Foreign.Marshal.Alloc
-import System.IO.Unsafe
 import Foreign.Storable -- for poking
 import Data.Word
 import Data.Bits
+
+bufferSize :: CInt -> CInt -> CInt -> Int
+bufferSize w h ch = fromIntegral (w * h * ch)
 
 mkCInt :: Int -> CInt
 mkCInt n = fromIntegral n
@@ -20,7 +22,7 @@ imageFn (x, y) = color
         red = shiftL 255 0
         green = shiftL 255 8
         blue = shiftL 255 16
-        black = 0
+        black = 0::Word8
         alpha = shiftL 100 24
        
         color = if (x10 && y10) || (not x10 && not y10)
@@ -29,15 +31,15 @@ imageFn (x, y) = color
 
 
 poker :: Ptr Word8 -> ( (Int, Int) -> Word32 ) -> (Int, Int) -> (Int, Int) -> IO ()
-poker ptr imgFun (xres, yres) (x, y) = 
-      pokeByteOff ptr (4 * (y * xres + x)) (imgFun (x, y))
+poker wptr imgFun (xres, _) (x, y) = 
+      pokeByteOff wptr (4 * (y * xres + x)) (imgFun (x, y))
 
 
 initImage :: Ptr Word8 -> Int -> Int -> IO ()
-initImage ptr xres yres = do
+initImage wptr xres yres = do
 
           let allCoords = [ (x, y) | x <- [0..xres-1], y <- [0..yres-1] ]
-          let myPoker = poker ptr imageFn (xres, yres)
+          let myPoker = poker wptr imageFn (xres, yres)
           
           foldr (>>) (return ()) (map myPoker allCoords)
 
@@ -50,13 +52,15 @@ writeImage xres yres name = do
            uempty <- newCString ""
            
            -- allocate some memory
-           let memSize = xres * yres * 8 * 4
-           mem <- mallocBytes memSize
+           let memSize = xres * yres * 4
+--           mem <- mallocBytes memSize
 
-           initImage mem xres yres
+--           initImage mem xres yres
+
+           mem <- readImage "tanya.png"
 
            -- create an ImageSpec object
-           spec <- c_ImageSpecCreate (mkCInt xres) (mkCInt yres) (4::CInt) nullPtr
+           spec <- c_ImageSpecCreate_1 (mkCInt xres) (mkCInt yres) (4::CInt) nullPtr
            
            -- create an ImageOutput object
            outImg <- c_ImageOutputCreate uname uempty
@@ -70,13 +74,54 @@ writeImage xres yres name = do
            -- close the file
            closebool <- c_ImageOutput_close outImg
 
-           -- release mem
-           free uname
---           free uempty
            free mem
-           
+           free uname
+           free uempty
            return (closebool && writebool && openbool)
 
 
+
+readImage :: String -> IO (Ptr Word8)
+readImage name = do
+          
+          uname <- newCString name
+          uempty <- newCString "" 
+
+          -- create a new ImageInput pointer with the filename
+          iiPtr <- c_ImageInputCreate uname uempty
+          
+          -- create a new ImageSpec object
+          iSpecPtr <- c_ImageSpecCreate_0 nullPtr          
+
+          -- open the input image, passing again the filename and spec
+          isOpen <- c_ImageInput_open iiPtr uname iSpecPtr          
+
+          -- get the xres, yres, and channels from the spec object
+          width <- c_ImageSpec_width iSpecPtr
+          height <- c_ImageSpec_height iSpecPtr
+          nchannels <- c_ImageSpec_nchannels iSpecPtr
+
+          -- use them to create a new memory buffer of type char, xres * yres * channels
+          let memSize = bufferSize width height nchannels
+          mem <- mallocBytes memSize
+
+          -- call in->read_image(UINT8, pixels)
+          isRead <- c_ImageInput_read_image_0 iiPtr uint8 mem
+
+          -- close the input image
+          isClosed <- c_ImageInput_close iiPtr
+
+          free uname
+          free uempty
+          
+          -- return the pointer to the data
+          return mem
+
+
+
+main :: IO Bool
 main = do 
-     writeImage 640 480 "haskelltest.png" 
+
+--     mem <- readImage "tanya.png"
+
+     writeImage 2600 3888 "haskelltest.png" 
