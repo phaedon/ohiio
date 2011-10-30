@@ -7,6 +7,44 @@ import Foreign.Marshal.Alloc
 import Foreign.Storable -- for poking
 import Data.Word
 import Data.Bits
+import System.IO.Unsafe
+
+
+data PrimaryColor = Red | Green | Blue | Alpha
+     deriving (Eq, Show)
+
+colorShift :: PrimaryColor -> Int
+colorShift pc | pc == Red = 0
+              | pc == Green = 8
+              | pc == Blue = 16
+              | pc == Alpha = 24
+              | otherwise = error "No such color!"
+
+colorMask :: PrimaryColor -> Word32
+colorMask pc = shiftL 0x000000ff (colorShift pc)
+
+-- converts a hex number to an individual color
+getColor :: Word32 -> PrimaryColor -> Word8
+getColor wordColor pc = fromIntegral $ shiftR (wordColor .&. mask) sh
+         where
+         mask = colorMask pc
+         sh = colorShift pc
+
+type Point = (Int, Int)
+type Color = (Word8, Word8, Word8, Word8)
+type Image = Point -> Color
+
+toColor :: Word32 -> Color
+toColor wordColor = (gc Red, gc Green, gc Blue, gc Alpha)
+        where
+        gc = getColor wordColor
+
+fromColor :: Color -> Word32
+fromColor (r, g, b, a) = 
+          fromIntegral (shiftL r 0)
+          .|. fromIntegral (shiftL g 8)
+          .|. fromIntegral (shiftL b 16)
+          .|. fromIntegral (shiftL a 24)
 
 bufferSize :: CInt -> CInt -> CInt -> Int
 bufferSize w h ch = fromIntegral (w * h * ch)
@@ -30,16 +68,53 @@ imageFn (x, y) = color
               else blue .|. green .|. alpha
 
 
-poker :: Ptr Word8 -> ( (Int, Int) -> Word32 ) -> (Int, Int) -> (Int, Int) -> IO ()
-poker wptr imgFun (xres, _) (x, y) = 
-      pokeByteOff wptr (4 * (y * xres + x)) (imgFun (x, y))
+mkImageFnFromFile :: String -> IO Image
+mkImageFnFromFile filename = do
 
+                  -- Read the image and grab the relevant pointers
+                  (mem, iSpecPtr) <- readImage filename
+
+                  -- image size info
+                  width <- c_ImageSpec_width iSpecPtr 
+                  height <- c_ImageSpec_height iSpecPtr 
+                  nchannels <- c_ImageSpec_nchannels iSpecPtr                        
+
+                  let dims = (fromIntegral width, fromIntegral height, fromIntegral nchannels)
+
+                  -- Partial function application allows us to return a closure
+                  return $ image mem dims
+                  
+                  where
+                  image :: Ptr Word8 -> (Int, Int, Int) -> Image
+                  image mem (w, h, chan) (x, y) 
+                        -- bounds checking
+                        | x >= w = (0,0,0,0)
+                        | y >= h = (0,0,0,0)
+
+                        -- We're safe. Retrieve!
+                        | otherwise = toColor (unsafePerformIO $ peekByteOff mem offset)
+
+                        where
+                        offset = chan * (y * w + x)
+
+
+poker :: Ptr Word8 -> Image -> (Int, Int) -> (Int, Int) -> IO ()
+poker wptr imgFun (xres, _) (x, y) = do
+      pokeByteOff wptr (4 * (y * xres + x)) r
+      pokeByteOff wptr (4 * (y * xres + x) + 1) g
+      pokeByteOff wptr (4 * (y * xres + x) + 2) b
+      pokeByteOff wptr (4 * (y * xres + x) + 3) a
+       
+      where 
+      (r, g, b, a) = imgFun (x, y)
 
 initImage :: Ptr Word8 -> Int -> Int -> IO ()
 initImage wptr xres yres = do
 
+          genericImage <- mkImageFnFromFile "tanya.png"
+
           let allCoords = [ (x, y) | x <- [0..xres-1], y <- [0..yres-1] ]
-          let myPoker = poker wptr imageFn (xres, yres)
+          let myPoker = poker wptr genericImage (xres, yres)
           
           foldr (>>) (return ()) (map myPoker allCoords)
 
@@ -53,12 +128,10 @@ writeImage xres yres name = do
            
            -- allocate some memory
            let memSize = xres * yres * 4
---           mem <- mallocBytes memSize
+           mem <- mallocBytes memSize
 
---           initImage mem xres yres
-
-           mem <- readImage "tanya.png"
-
+           initImage mem xres yres
+           
            -- create an ImageSpec object
            spec <- c_ImageSpecCreate_1 (mkCInt xres) (mkCInt yres) (4::CInt) nullPtr
            
@@ -81,7 +154,7 @@ writeImage xres yres name = do
 
 
 
-readImage :: String -> IO (Ptr Word8)
+readImage :: String -> IO (Ptr Word8, Ptr ImageSpec)
 readImage name = do
           
           uname <- newCString name
@@ -115,13 +188,11 @@ readImage name = do
           free uempty
           
           -- return the pointer to the data
-          return mem
+          return (mem, iSpecPtr)
 
 
 
 main :: IO Bool
 main = do 
-
---     mem <- readImage "tanya.png"
 
      writeImage 2600 3888 "haskelltest.png" 
