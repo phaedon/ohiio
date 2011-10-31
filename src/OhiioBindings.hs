@@ -1,4 +1,4 @@
-{-# INCLUDE "./ohiio.h" #-}
+-- {-# INCLUDE "./ohiio.h" #-}
 {-# LINE 1 "src/bindings.hs" #-}
 {-# LANGUAGE CPP, ForeignFunctionInterface #-}
 {-# LINE 2 "src/bindings.hs" #-}

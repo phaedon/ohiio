@@ -1,4 +1,4 @@
-module ImageInput where
+module Ohiio.ImageInput (readImage) where
 
 import OhiioBindings
 import Utilities
@@ -8,7 +8,11 @@ import Foreign.Ptr
 import Foreign.C.String -- for newCString
 import Foreign.Marshal.Alloc -- for malloc & free
 
-
+-- |Reads an image from file.
+-- The "name" argument is the filename.
+-- Returns a pair. The first element is a pointer to the 
+-- image memory buffer; the second element is a pointer 
+-- to the image's metadata.
 readImage :: String -> IO (Ptr Word8, Ptr ImageSpec)
 readImage name = do
           
@@ -42,15 +46,17 @@ readImage name = do
                 then do free mem
                         free uname
                         free uempty
-                        error "Could not read the input Image."  
+                        error "Could not read the input image."  
                 else do
 
                 -- close the input image
                 isClosed <- c_ImageInput_close iiPtr
-                    
-                free uname
-                free uempty
+                if not isClosed 
+                   then error "Could not close the output image."
+                   else do 
+                   free uname
+                   free uempty
   
-                -- return the pointer to the data
-                return (mem, iSpecPtr)
+                   -- return the pointer to the data
+                   return (mem, iSpecPtr)
 

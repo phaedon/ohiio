@@ -30,9 +30,6 @@ getColor wordColor pc = fromIntegral $ shiftR (wordColor .&. mask) sh
          mask = colorMask pc
          sh = colorShift pc
 
-type Point = (Int, Int)
-type Color = (Word8, Word8, Word8, Word8)
-type Image = Point -> Color
 
 
 toColor :: Word32 -> Color
@@ -48,59 +45,10 @@ fromColor (r, g, b, a) =
           .|. fromIntegral (shiftL a 24)
 
 
-poker :: Ptr Word8 -> Image -> (Int, Int) -> (Int, Int) -> IO ()
-poker wptr imgFun (xres, _) (x, y) = do
-      pokeByteOff wptr (4 * (y * xres + x)) r
-      pokeByteOff wptr (4 * (y * xres + x) + 1) g
-      pokeByteOff wptr (4 * (y * xres + x) + 2) b
-      pokeByteOff wptr (4 * (y * xres + x) + 3) a
-       
-      where 
-      (r, g, b, a) = imgFun (x, y)
 
 initImage :: Ptr Word8 -> Int -> Int -> IO ()
-initImage wptr xres yres = do
-
-          genericImage <- mkImageFnFromFile "tanya.png"
-
-          let allCoords = [ (x, y) | x <- [0..xres-1], y <- [0..yres-1] ]
-          let myPoker = poker wptr genericImage (xres, yres)
-          
-          foldr (>>) (return ()) (map myPoker allCoords)
 
 
-writeImage :: Int -> Int -> String -> IO Bool
-writeImage xres yres name = do
-           
-           -- convert the name to a CString, and take out of IO Monad
-           uname <- newCString name
-           uempty <- newCString ""
-           
-           -- allocate some memory
-           let memSize = xres * yres * 4
-           mem <- mallocBytes memSize
-
-           initImage mem xres yres
-           
-           -- create an ImageSpec object
-           spec <- c_ImageSpecCreate_1 (mkCInt xres) (mkCInt yres) (4::CInt) nullPtr
-           
-           -- create an ImageOutput object
-           outImg <- c_ImageOutputCreate uname uempty
-
-           -- open it in memory...
-           openbool <- c_ImageOutput_open outImg uname spec create
-           
-           -- write the image to file
-           writebool <- c_ImageOutput_write_image outImg uint8 mem
-
-           -- close the file
-           closebool <- c_ImageOutput_close outImg
-
-           free mem
-           free uname
-           free uempty
-           return (closebool && writebool && openbool)
 
 
 main :: IO Bool
