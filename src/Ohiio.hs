@@ -13,6 +13,8 @@ import Foreign.C.String
 
 {-# LINE 11 "src/bindings.hs" #-}
 
+type BytePtr = Ptr Word8
+
 data ImageSpec = ImageSpec
 data ImageInput = ImageInput
 data ImageOutput = ImageOutput
@@ -27,7 +29,7 @@ appendsubimage  = OpenMode 1
 appendmiplevel  :: OpenMode
 appendmiplevel  = OpenMode 2
 
-{-# LINE 24 "src/bindings.hs" #-}
+{-# LINE 26 "src/bindings.hs" #-}
 
 newtype BaseType = BaseType { btype :: CInt }
 unknown  :: BaseType
@@ -79,7 +81,7 @@ ptr  = BaseType 14
 lastbase  :: BaseType
 lastbase  = BaseType 15
  
-{-# LINE 52 "src/bindings.hs" #-}
+{-# LINE 54 "src/bindings.hs" #-}
 
 
 {-

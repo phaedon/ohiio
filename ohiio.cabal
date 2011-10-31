@@ -7,11 +7,20 @@ Build-type:          Simple
 Cabal-version:       >=1.2
 
 
-Executable ohiio
-  Main-is:        imagewriter.hs
-  hs-source-dirs: src	
-  Build-depends:  base
-  Other-modules:  Ohiio
-  ghc-options:    -Wall 
+library
+  exposed-modules: ImageInput ImageOutput
+  build-depends: base
+  hs-source-dirs: src src/Ohiio
+  Other-modules: OhiioBindings
+  ghc-options: -Wall
   extra-libraries: ohiio
   extra-lib-dirs: /Users/phaedon/github/ohiio/ohiio/DerivedData/ohiio/Build/Products/Debug/ 
+
+
+-- Executable ohiio
+--  Main-is:        imagewriter.hs
+--  hs-source-dirs: src	
+--  Build-depends:  base
+--  Other-modules:  Ohiio
+--  ghc-options:    -Wall 
+  

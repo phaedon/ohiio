@@ -1,4 +1,7 @@
+{-# INCLUDE "./ohiio.h" #-}
+{-# LINE 1 "src/bindings.hs" #-}
 {-# LANGUAGE CPP, ForeignFunctionInterface #-}
+{-# LINE 2 "src/bindings.hs" #-}
 
 module OhiioBindings where
 
@@ -6,7 +9,8 @@ import Foreign
 import Foreign.C.Types
 import Foreign.C.String
 
-#include "./ohiio.h"
+
+{-# LINE 10 "src/bindings.hs" #-}
 
 type BytePtr = Ptr Word8
 
@@ -17,39 +21,66 @@ data TypeDesc = TypeDesc
 
 
 newtype OpenMode = OpenMode { mode :: CInt }
-#{enum OpenMode, OpenMode,
-       create = Create, 
-       appendsubimage = AppendSubimage, 
-       appendmiplevel = AppendMIPLevel 
-}
+create  :: OpenMode
+create  = OpenMode 0
+appendsubimage  :: OpenMode
+appendsubimage  = OpenMode 1
+appendmiplevel  :: OpenMode
+appendmiplevel  = OpenMode 2
+
+{-# LINE 25 "src/bindings.hs" #-}
 
 newtype BaseType = BaseType { btype :: CInt }
-#{enum BaseType, BaseType,
-     unknown = UNKNOWN,
-     none = NONE,
-     uchar =  UCHAR,
-     uint8 = UCHAR,
-     char = CHAR,
-     int8 = INT8,
-     ushort = USHORT,
-     uint16 = UINT16,
-     short = SHORT,
-     int16 = INT16,
-     uint = UINT,
-     uint32 = UINT32,
-     int = INT,
-     int32 = INT32,
-     ulonglong = ULONGLONG,
-     uint64 = UINT64,
-     longlong = LONGLONG,
-     int64 = INT64,
-     half = HALF,
-     float = FLOAT,
-     double = DOUBLE,
-     string = STRING,
-     ptr = PTR,
-     lastbase = LASTBASE
-} 
+unknown  :: BaseType
+unknown  = BaseType 0
+none  :: BaseType
+none  = BaseType 1
+uchar  :: BaseType
+uchar  = BaseType 2
+uint8  :: BaseType
+uint8  = BaseType 2
+char  :: BaseType
+char  = BaseType 3
+int8  :: BaseType
+int8  = BaseType 3
+ushort  :: BaseType
+ushort  = BaseType 4
+uint16  :: BaseType
+uint16  = BaseType 4
+short  :: BaseType
+short  = BaseType 5
+int16  :: BaseType
+int16  = BaseType 5
+uint  :: BaseType
+uint  = BaseType 6
+uint32  :: BaseType
+uint32  = BaseType 6
+int  :: BaseType
+int  = BaseType 7
+int32  :: BaseType
+int32  = BaseType 7
+ulonglong  :: BaseType
+ulonglong  = BaseType 8
+uint64  :: BaseType
+uint64  = BaseType 8
+longlong  :: BaseType
+longlong  = BaseType 9
+int64  :: BaseType
+int64  = BaseType 9
+half  :: BaseType
+half  = BaseType 10
+float  :: BaseType
+float  = BaseType 11
+double  :: BaseType
+double  = BaseType 12
+string  :: BaseType
+string  = BaseType 13
+ptr  :: BaseType
+ptr  = BaseType 14
+lastbase  :: BaseType
+lastbase  = BaseType 15
+ 
+{-# LINE 53 "src/bindings.hs" #-}
 
 
 {-

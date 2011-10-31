@@ -34,6 +34,7 @@ type Point = (Int, Int)
 type Color = (Word8, Word8, Word8, Word8)
 type Image = Point -> Color
 
+
 toColor :: Word32 -> Color
 toColor wordColor = (gc Red, gc Green, gc Blue, gc Alpha)
         where
@@ -45,57 +46,6 @@ fromColor (r, g, b, a) =
           .|. fromIntegral (shiftL g 8)
           .|. fromIntegral (shiftL b 16)
           .|. fromIntegral (shiftL a 24)
-
-bufferSize :: CInt -> CInt -> CInt -> Int
-bufferSize w h ch = fromIntegral (w * h * ch)
-
-mkCInt :: Int -> CInt
-mkCInt n = fromIntegral n
-
-imageFn :: (Int, Int) -> Word32
-imageFn (x, y) = color
-        where
-        x10 = even $ x `div` 10
-        y10 = even $ y `div` 10
-        red = shiftL 255 0
-        green = shiftL 255 8
-        blue = shiftL 255 16
-        black = 0::Word8
-        alpha = shiftL 100 24
-       
-        color = if (x10 && y10) || (not x10 && not y10)
-              then red .|. alpha
-              else blue .|. green .|. alpha
-
-
-mkImageFnFromFile :: String -> IO Image
-mkImageFnFromFile filename = do
-
-                  -- Read the image and grab the relevant pointers
-                  (mem, iSpecPtr) <- readImage filename
-
-                  -- image size info
-                  width <- c_ImageSpec_width iSpecPtr 
-                  height <- c_ImageSpec_height iSpecPtr 
-                  nchannels <- c_ImageSpec_nchannels iSpecPtr                        
-
-                  let dims = (fromIntegral width, fromIntegral height, fromIntegral nchannels)
-
-                  -- Partial function application allows us to return a closure
-                  return $ image mem dims
-                  
-                  where
-                  image :: Ptr Word8 -> (Int, Int, Int) -> Image
-                  image mem (w, h, chan) (x, y) 
-                        -- bounds checking
-                        | x >= w = (0,0,0,0)
-                        | y >= h = (0,0,0,0)
-
-                        -- We're safe. Retrieve!
-                        | otherwise = toColor (unsafePerformIO $ peekByteOff mem offset)
-
-                        where
-                        offset = chan * (y * w + x)
 
 
 poker :: Ptr Word8 -> Image -> (Int, Int) -> (Int, Int) -> IO ()
@@ -153,46 +103,8 @@ writeImage xres yres name = do
            return (closebool && writebool && openbool)
 
 
-
-readImage :: String -> IO (Ptr Word8, Ptr ImageSpec)
-readImage name = do
-          
-          uname <- newCString name
-          uempty <- newCString "" 
-
-          -- create a new ImageInput pointer with the filename
-          iiPtr <- c_ImageInputCreate uname uempty
-          
-          -- create a new ImageSpec object
-          iSpecPtr <- c_ImageSpecCreate_0 nullPtr          
-
-          -- open the input image, passing again the filename and spec
-          isOpen <- c_ImageInput_open iiPtr uname iSpecPtr          
-
-          -- get the xres, yres, and channels from the spec object
-          width <- c_ImageSpec_width iSpecPtr
-          height <- c_ImageSpec_height iSpecPtr
-          nchannels <- c_ImageSpec_nchannels iSpecPtr
-
-          -- use them to create a new memory buffer of type char, xres * yres * channels
-          let memSize = bufferSize width height nchannels
-          mem <- mallocBytes memSize
-
-          -- call in->read_image(UINT8, pixels)
-          isRead <- c_ImageInput_read_image_0 iiPtr uint8 mem
-
-          -- close the input image
-          isClosed <- c_ImageInput_close iiPtr
-
-          free uname
-          free uempty
-          
-          -- return the pointer to the data
-          return (mem, iSpecPtr)
-
-
-
 main :: IO Bool
 main = do 
 
-     writeImage 2600 3888 "haskelltest.png" 
+--     writeImage 2600 3888 "haskelltest.png" 
+     writeImage 4000 4000 "haskelltest.png" 
