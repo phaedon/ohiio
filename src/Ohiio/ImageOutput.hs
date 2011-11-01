@@ -1,3 +1,5 @@
+-- | Haskell interface to OIIO's ImageOutput functionality
+--  (with more of a Haskell flavor)
 module Ohiio.ImageOutput (writeImage) where
 
 import OhiioBindings
@@ -34,16 +36,21 @@ poker wptr imgFun (xres, _) (x, y) = do
 
 
 populateBuffer :: BytePtr -> Image -> (Int, Int) -> IO ()
-populateBuffer wptr img (xres, yres) = do
+populateBuffer wptr img (xres, yres) = do 
 
-               let allCoords = [ (x, y) | x <- [0..xres-1], y <- [0..yres-1] ]
-               let myPoker = poker wptr img (xres, yres)
-          
-               --  foldr (>>) (return ()) (map myPoker allCoords)
-               mapM_ myPoker allCoords
+               -- define double loop over monadic actions
+               let loop i j | j == yres = return ()
+                            | i == xres = loop 0 (j+1)
+                            | otherwise = 
+                     poker wptr img (xres, yres) (i,j) >> loop (i+1) j
 
+               loop 0 0
 
-writeImage :: Image -> (Int, Int) -> String -> IO Bool
+-- |Writes an image to file
+writeImage :: Image      -- ^ Image function to output
+           -> (Int, Int) -- ^ Dimensions
+           -> String     -- ^ Filename
+           -> IO Bool    -- ^ Success?
 writeImage img (xres, yres) name = do
            
            -- convert the name to a CString, and take out of IO Monad

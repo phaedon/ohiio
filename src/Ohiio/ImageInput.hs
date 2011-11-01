@@ -1,3 +1,4 @@
+-- | This is a friendly Haskell interface to OIIO's ImageInput struct.
 module Ohiio.ImageInput (readImage) where
 
 import OhiioBindings
@@ -13,7 +14,10 @@ import Foreign.Marshal.Alloc -- for malloc & free
 -- Returns a pair. The first element is a pointer to the 
 -- image memory buffer; the second element is a pointer 
 -- to the image's metadata.
-readImage :: String -> IO (Ptr Word8, Ptr ImageSpec)
+readImage :: String  -- ^ Filename
+          -> IO (Ptr Word8, Ptr ImageSpec) -- ^ The first elem is a pointer to 
+                            -- the image memory buffer, and the second is a 
+                            -- pointer to the image's metadata
 readImage name = do
           
           uname <- newCString name
