@@ -49,8 +49,6 @@ enum BaseType { UNKNOWN, NONE,
     ULONGLONG, UINT64=ULONGLONG, LONGLONG, INT64=LONGLONG,
     HALF, FLOAT, DOUBLE, STRING, PTR, LASTBASE };
 
-
-
 #ifdef __cplusplus 
 extern "C" {
 #endif

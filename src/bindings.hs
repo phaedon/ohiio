@@ -5,6 +5,7 @@ module OhiioBindings where
 import Foreign
 import Foreign.C.Types
 import Foreign.C.String
+import Foreign.ForeignPtr
 
 #include "./ohiio.h"
 

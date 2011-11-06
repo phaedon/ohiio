@@ -1,4 +1,4 @@
--- {-# INCLUDE "./ohiio.h" #-}
+{-# INCLUDE "./ohiio.h" #-}
 {-# LINE 1 "src/bindings.hs" #-}
 {-# LANGUAGE CPP, ForeignFunctionInterface #-}
 {-# LINE 2 "src/bindings.hs" #-}
@@ -8,9 +8,10 @@ module OhiioBindings where
 import Foreign
 import Foreign.C.Types
 import Foreign.C.String
+import Foreign.ForeignPtr
 
 
-{-# LINE 10 "src/bindings.hs" #-}
+{-# LINE 11 "src/bindings.hs" #-}
 
 type BytePtr = Ptr Word8
 
@@ -28,7 +29,7 @@ appendsubimage  = OpenMode 1
 appendmiplevel  :: OpenMode
 appendmiplevel  = OpenMode 2
 
-{-# LINE 25 "src/bindings.hs" #-}
+{-# LINE 26 "src/bindings.hs" #-}
 
 newtype BaseType = BaseType { btype :: CInt }
 unknown  :: BaseType
@@ -80,7 +81,7 @@ ptr  = BaseType 14
 lastbase  :: BaseType
 lastbase  = BaseType 15
  
-{-# LINE 53 "src/bindings.hs" #-}
+{-# LINE 54 "src/bindings.hs" #-}
 
 
 {-
