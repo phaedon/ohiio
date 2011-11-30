@@ -5,7 +5,7 @@ module OhiioBindings where
 import Foreign
 import Foreign.C.Types
 import Foreign.C.String
-import Foreign.ForeignPtr
+--import Foreign.ForeignPtr
 
 #include "./ohiio.h"
 
@@ -101,6 +101,9 @@ foreign import ccall unsafe "ImageInput_read_image_1"
 foreign import ccall unsafe "ImageOutputCreate"
         c_ImageOutputCreate :: CString -> CString -> IO (Ptr ImageOutput)
 
+foreign import ccall unsafe "ImageOutput_format_name"
+        c_ImageOutput_format_name :: Ptr ImageOutput -> IO Bool
+
 foreign import ccall unsafe "ImageOutput_open"
         c_ImageOutput_open :: Ptr ImageOutput -> Ptr CChar -> Ptr ImageSpec -> OpenMode -> IO Bool
 
@@ -109,3 +112,29 @@ foreign import ccall unsafe "ImageOutput_close"
 
 foreign import ccall unsafe "ImageOutput_write_image_0"
         c_ImageOutput_write_image :: Ptr ImageOutput -> BaseType -> Ptr Word8 -> IO Bool
+
+foreign import ccall unsafe "ImageOutput_write_scanline"
+        c_ImageOutput_write_scanline :: Ptr ImageOutput -> CInt -> CInt -> BaseType -> Ptr Word8 -> IO Bool
+
+foreign import ccall unsafe "ImageOutput_write_scanlines"
+        c_ImageOutput_write_scanlines :: Ptr ImageOutput -> CInt -> CInt -> CInt 
+                                         -> BaseType -> Ptr Word8 -> IO Bool
+
+foreign import ccall unsafe "ImageOutput_write_tile"
+        c_ImageOutput_write_tile :: Ptr ImageOutput 
+                                    -> CInt -> CInt -> CInt
+                                    -> BaseType -> Ptr Word8 -> IO Bool
+
+foreign import ccall unsafe "ImageOutput_write_tiles"
+        c_ImageOutput_write_tiles :: Ptr ImageOutput 
+                                    -> CInt -> CInt 
+                                    -> CInt -> CInt
+                                    -> CInt -> CInt
+                                    -> BaseType -> Ptr Word8 -> IO Bool
+
+foreign import ccall unsafe "ImageOutput_write_rectangle"
+        c_ImageOutput_write_rectangle :: Ptr ImageOutput 
+                                    -> CInt -> CInt 
+                                    -> CInt -> CInt
+                                    -> CInt -> CInt
+                                    -> BaseType -> Ptr Word8 -> IO Bool
