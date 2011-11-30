@@ -95,6 +95,10 @@ ImageOutput *ImageOutputCreate (const char *filename,
     
 }
 
+const char *ImageOutput_format_name(ImageOutput *imageOutput) {
+    return imageOutput->format_name();
+}
+
 
 bool ImageOutput_open (ImageOutput *imageOutput,
                        const char *name, 
@@ -129,6 +133,61 @@ bool ImageOutput_write_image_1 (ImageOutput *imageOutput,
     
 }
 
-//}
+bool ImageOutput_write_scanline (ImageOutput *imageOutput,
+                                 int y, int z, 
+                                 enum BaseType format,
+                                 const void *data) {
+    
+    return imageOutput->write_scanline(y, z, 
+                                       TypeDesc( (TypeDesc::BASETYPE) format), 
+                                       data);
+}
+
+bool ImageOutput_write_scanlines (ImageOutput *imageOutput,
+                                  int ybegin, int yend, int z,
+                                  enum BaseType format, 
+                                  const void *data) {
+    
+    return imageOutput->write_scanlines(ybegin, yend, z, 
+                                        TypeDesc( (TypeDesc::BASETYPE) format), 
+                                        data);
+}
+
+
+bool ImageOutput_write_tile (ImageOutput *imageOutput,
+                             int x, int y, int z, 
+                             enum BaseType format,
+                             const void *data) {
+    
+    return imageOutput->write_tile(x, y, z, TypeDesc( (TypeDesc::BASETYPE) format), data);
+}
+
+bool ImageOutput_write_tiles (ImageOutput *imageOutput,
+                              int xbegin, int xend, 
+                              int ybegin, int yend,
+                              int zbegin, int zend, 
+                              enum BaseType format,
+                              const void *data) {
+    
+    return imageOutput->write_tiles(xbegin, xend, 
+                                    ybegin, yend, 
+                                    zbegin, zend,  
+                                    TypeDesc( (TypeDesc::BASETYPE) format), 
+                                    data);
+}
+
+bool ImageOutput_write_rectangle (ImageOutput *imageOutput,
+                                  int xbegin, int xend, 
+                                  int ybegin, int yend,
+                                  int zbegin, int zend, 
+                                  enum BaseType format,
+                                  const void *data) {
+    
+    return imageOutput->write_rectangle(xbegin, xend, 
+                                        ybegin, yend, 
+                                        zbegin, zend, 
+                                        TypeDesc( (TypeDesc::BASETYPE) format), 
+                                        data);
+}
 
 

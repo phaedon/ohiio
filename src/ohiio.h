@@ -110,6 +110,8 @@ extern "C" {
     
     ImageOutput *ImageOutputCreate (const char *filename,
                                     const char *plugin_searchpath);
+    
+    const char *ImageOutput_format_name(ImageOutput *imageOutput);
         
     bool ImageOutput_open (ImageOutput *imageOutput,
                            const char *name, 
@@ -117,6 +119,36 @@ extern "C" {
                            enum OpenMode mode);
     
     bool ImageOutput_close (ImageOutput *imageOutput);
+    
+    
+    bool ImageOutput_write_scanline (ImageOutput *imageOutput,
+                                     int y, int z, 
+                                     enum BaseType format,
+                                     const void *data);
+    
+    bool ImageOutput_write_scanlines (ImageOutput *imageOutput,
+                                      int ybegin, int yend, int z,
+                                      enum BaseType format, 
+                                      const void *data);
+    
+    bool ImageOutput_write_tile (ImageOutput *imageOutput,
+                                 int x, int y, int z, 
+                                 enum BaseType format,
+                                 const void *data);
+    
+    bool ImageOutput_write_tiles (ImageOutput *imageOutput,
+                                  int xbegin, int xend, 
+                                  int ybegin, int yend,
+                                  int zbegin, int zend, 
+                                  enum BaseType format,
+                                  const void *data);
+    
+    bool ImageOutput_write_rectangle (ImageOutput *imageOutput,
+                                      int xbegin, int xend, 
+                                      int ybegin, int yend,
+                                      int zbegin, int zend, 
+                                      enum BaseType format,
+                                      const void *data);
     
     // uses default args
     bool ImageOutput_write_image_0 (ImageOutput *imageOutput,
