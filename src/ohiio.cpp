@@ -52,6 +52,18 @@ ImageInput *ImageInputCreate (const char *filename,
 }
 
 
+// WARNING: this function allocates memory, which should be freed.
+// Temporary workaround to access this struct which is returned by reference in C++.
+ImageSpec *ImageInput_spec (ImageInput *imageInput) {
+    
+    ImageSpec tempspec = imageInput->spec();
+    
+    ImageSpec *retSpec = new ImageSpec;
+    memcpy(retSpec, &tempspec, sizeof(ImageSpec));
+    return retSpec;
+}
+
+
 bool ImageInput_open (ImageInput *imageInput,
                       const char *name, ImageSpec *newspec) {
     return imageInput->open(name, *newspec);
@@ -77,6 +89,27 @@ bool ImageInput_read_image_1 (ImageInput *imageInput,
     return imageInput->read_image (data);
 }
 
+
+bool ImageInput_read_scanline (ImageInput *imageInput,
+                               int y, int z, 
+                               enum BaseType format, 
+                               void *data) {
+    return imageInput->read_scanline(y, z, TypeDesc( (TypeDesc::BASETYPE) format), data);
+}
+
+bool ImageInput_read_scanlines (ImageInput *imageInput,
+                                int ybegin, int yend, int z,
+                                enum BaseType format, 
+                                void *data) {
+    return imageInput->read_scanlines(ybegin, yend, z, TypeDesc( (TypeDesc::BASETYPE) format), data);
+}
+
+bool ImageInput_read_tile (ImageInput *imageInput,
+                           int x, int y, int z, 
+                           enum BaseType format,
+                           void *data) {
+    return imageInput->read_tile(x, y, z, TypeDesc( (TypeDesc::BASETYPE) format), data);
+}
 
 
 /****************************

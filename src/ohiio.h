@@ -73,6 +73,7 @@ extern "C" {
     int ImageSpec_height(ImageSpec *ispec);
     int ImageSpec_nchannels(ImageSpec *ispec);
     
+    
     /****************************
      *
      *  class ImageInput
@@ -82,6 +83,7 @@ extern "C" {
     ImageInput *ImageInputCreate (const char *filename,
                                   const char *plugin_searchpath);
 
+    ImageSpec *ImageInput_spec (ImageInput *imageInput);
     
     /// Open file with given name.  Various file attributes are put in
     /// newspec and a copy is also saved in this->spec.  From these
@@ -101,6 +103,20 @@ extern "C" {
     bool ImageInput_read_image_1 (ImageInput *imageInput, 
                                 float *data);
     
+    bool ImageInput_read_scanline (ImageInput *imageInput,
+                                   int y, int z, 
+                                   enum BaseType format, 
+                                   void *data);
+    
+    bool ImageInput_read_scanlines (ImageInput *imageInput,
+                                    int ybegin, int yend, int z,
+                                    enum BaseType format, 
+                                    void *data);
+    
+    bool ImageInput_read_tile (ImageInput *imageInput,
+                               int x, int y, int z, 
+                               enum BaseType format,
+                               void *data);
     
     /****************************
      *
