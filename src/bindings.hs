@@ -80,6 +80,9 @@ foreign import ccall unsafe "ImageSpec_nchannels"
 foreign import ccall unsafe "ImageInputCreate"
         c_ImageInputCreate :: CString -> CString -> IO (Ptr ImageInput)
 
+foreign import ccall unsafe "ImageInput_spec"
+        c_ImageInput_spec :: Ptr ImageInput -> IO (Ptr ImageSpec)
+
 foreign import ccall unsafe "ImageInput_open"
         c_ImageInput_open :: Ptr ImageInput -> CString -> Ptr ImageSpec -> IO Bool
 
@@ -92,6 +95,26 @@ foreign import ccall unsafe "ImageInput_read_image_0"
 foreign import ccall unsafe "ImageInput_read_image_1"
         c_ImageInput_read_image_1 :: Ptr ImageInput -> Ptr Float -> IO Bool
 
+foreign import ccall unsafe "ImageInput_read_scanline"
+        c_ImageInput_read_scanline :: Ptr ImageInput 
+                                      -> CInt -> CInt
+                                      -> BaseType
+                                      -> Ptr Word8
+                                      -> IO Bool
+
+foreign import ccall unsafe "ImageInput_read_scanlines"
+        c_ImageInput_read_scanlines :: Ptr ImageInput 
+                                      -> CInt -> CInt -> CInt
+                                      -> BaseType
+                                      -> Ptr Word8
+                                      -> IO Bool
+
+foreign import ccall unsafe "ImageInput_read_tile"
+        c_ImageInput_read_tile :: Ptr ImageInput 
+                                      -> CInt -> CInt -> CInt
+                                      -> BaseType
+                                      -> Ptr Word8
+                                      -> IO Bool
 
 {-
  class ImageOutput
