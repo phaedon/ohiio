@@ -9,12 +9,16 @@ Cabal-version:       >=1.2
 
 library
 	-- ugh, take out OhiioBindings from here!!
-  exposed-modules: Ohiio.ImageInput Ohiio.ImageOutput OhiioBindings
+  exposed-modules: 
+    Ohiio.ImageInput 
+    Ohiio.ImageOutput
+    Ohiio.ImageSpec
+    OhiioBindings
   build-depends: base, bytestring
   hs-source-dirs: src src/Ohiio
 
-  -- these are the low-level bindings, auto-generated from bindings.hs:
----  Other-modules: OhiioBindings Utilities
+ -- these are the low-level bindings, auto-generated from bindings.hs:
+--  Other-modules: OhiioBindings Utilities
   Other-modules:  Utilities
   ghc-options: -Wall
 

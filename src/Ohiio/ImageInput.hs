@@ -1,5 +1,5 @@
 -- | This is a friendly Haskell interface to OIIO's ImageInput struct.
-module Ohiio.ImageInput (readImage) where
+module Ohiio.ImageInput (readImage, readScanlines) where
 
 import OhiioBindings
 import Utilities
@@ -12,10 +12,9 @@ import Foreign.Marshal.Alloc -- for malloc & free
 
 -- | Opens an image file (but does not read the contents)
 openImage :: String -- ^ Filename
-             -> String -- ^ Extension
              -> IO (Ptr ImageInput, Ptr ImageSpec)
-openImage name ext = do
-          uname <- newCString (name ++ "." ++ ext)
+openImage name = do
+          uname <- newCString name
           uempty <- newCString ""
           
           -- create a new ImageInput pointer with the filename
@@ -47,6 +46,16 @@ allocImageBuffer iSpecPtr = do
              let memSize = bufferSize width height nchannels
              mallocBytes memSize
 
+-- | Allocs a smaller image buffer
+allocImgBuffer :: Ptr ImageSpec -> Int -> Int -> IO (Ptr Word8)
+allocImgBuffer iSpecPtr ybegin yend = do
+               width <- c_ImageSpec_width iSpecPtr
+               nchannels <- c_ImageSpec_nchannels iSpecPtr
+               let height = mkCInt $ yend - ybegin + 1               
+
+               let memSize = bufferSize width height nchannels
+               mallocBytes memSize
+            
 
 -- |Reads an image from file.
 -- The "name" argument is the filename.
@@ -54,13 +63,12 @@ allocImageBuffer iSpecPtr = do
 -- image memory buffer; the second element is a pointer 
 -- to the image's metadata.
 readImage :: String  -- ^ Filename
-          -> String -- ^ Extension
           -> IO (Ptr Word8, Ptr ImageSpec) -- ^ The first elem is a pointer to 
                             -- the image memory buffer, and the second is a 
                             -- pointer to the image's metadata
-readImage name ext = do
+readImage name = do
           
-             (iiPtr, iSpecPtr) <- openImage name ext
+             (iiPtr, iSpecPtr) <- openImage name 
 
              mem <- allocImageBuffer iSpecPtr
 
@@ -79,3 +87,30 @@ readImage name ext = do
                    -- return the pointer to the data
                    return (mem, iSpecPtr)
 
+readScanlines :: String -> Int -> Int -> IO (Ptr Word8, Ptr ImageSpec)
+readScanlines name ybegin yend = do
+              
+              (iiPtr, iSpecPtr) <- openImage name
+              mem <- allocImgBuffer iSpecPtr ybegin yend
+              
+              isRead <- c_ImageInput_read_scanlines iiPtr 
+                        (mkCInt ybegin) 
+                        (mkCInt yend) 
+                        (mkCInt 0) 
+                        uint8 mem
+
+              if not isRead
+                then do free mem
+                        error "Could not read the input image."  
+                else do
+
+                -- close the input image
+                isClosed <- c_ImageInput_close iiPtr
+                if not isClosed 
+                   then error "Could not close the output image."
+                   else  
+                   -- return the pointer to the data
+                   return (mem, iSpecPtr)
+              
+
+              
