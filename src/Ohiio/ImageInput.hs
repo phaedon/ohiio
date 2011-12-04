@@ -9,20 +9,15 @@ import Foreign.Ptr
 import Foreign.C.String -- for newCString
 import Foreign.Marshal.Alloc -- for malloc & free
 
--- |Reads an image from file.
--- The "name" argument is the filename.
--- Returns a pair. The first element is a pointer to the 
--- image memory buffer; the second element is a pointer 
--- to the image's metadata.
-readImage :: String  -- ^ Filename
-          -> IO (Ptr Word8, Ptr ImageSpec) -- ^ The first elem is a pointer to 
-                            -- the image memory buffer, and the second is a 
-                            -- pointer to the image's metadata
-readImage name = do
-          
-          uname <- newCString name
-          uempty <- newCString "" 
 
+-- | Opens an image file (but does not read the contents)
+openImage :: String -- ^ Filename
+             -> String -- ^ Extension
+             -> IO (Ptr ImageInput, Ptr ImageSpec)
+openImage name ext = do
+          uname <- newCString (name ++ "." ++ ext)
+          uempty <- newCString ""
+          
           -- create a new ImageInput pointer with the filename
           iiPtr <- c_ImageInputCreate uname uempty
           
@@ -30,11 +25,19 @@ readImage name = do
           iSpecPtr <- c_ImageSpecCreate_0 nullPtr          
 
           -- open the input image, passing again the filename and spec
-          isOpen <- c_ImageInput_open iiPtr uname iSpecPtr          
+          isOpen <- c_ImageInput_open iiPtr uname iSpecPtr
+
+          free uname 
+          free uempty
+          
           if not isOpen
              then error "Could not open the input image."
-             else do
+             else return (iiPtr, iSpecPtr)
+          
 
+-- |Allocates an image buffer, based on the information in an ImageSpec object.
+allocImageBuffer :: Ptr ImageSpec -> IO (Ptr Word8)
+allocImageBuffer iSpecPtr = do
              -- get the xres, yres, and channels from the spec object
              width <- c_ImageSpec_width iSpecPtr
              height <- c_ImageSpec_height iSpecPtr
@@ -42,14 +45,29 @@ readImage name = do
 
              -- use them to create a new memory buffer of type char, xres * yres * channels
              let memSize = bufferSize width height nchannels
-             mem <- mallocBytes memSize
+             mallocBytes memSize
+
+
+-- |Reads an image from file.
+-- The "name" argument is the filename.
+-- Returns a pair. The first element is a pointer to the 
+-- image memory buffer; the second element is a pointer 
+-- to the image's metadata.
+readImage :: String  -- ^ Filename
+          -> String -- ^ Extension
+          -> IO (Ptr Word8, Ptr ImageSpec) -- ^ The first elem is a pointer to 
+                            -- the image memory buffer, and the second is a 
+                            -- pointer to the image's metadata
+readImage name ext = do
+          
+             (iiPtr, iSpecPtr) <- openImage name ext
+
+             mem <- allocImageBuffer iSpecPtr
 
              -- call in->read_image(UINT8, pixels)
              isRead <- c_ImageInput_read_image_0 iiPtr uint8 mem
              if not isRead
                 then do free mem
-                        free uname
-                        free uempty
                         error "Could not read the input image."  
                 else do
 
@@ -57,10 +75,7 @@ readImage name = do
                 isClosed <- c_ImageInput_close iiPtr
                 if not isClosed 
                    then error "Could not close the output image."
-                   else do 
-                   free uname
-                   free uempty
-  
+                   else  
                    -- return the pointer to the data
                    return (mem, iSpecPtr)
 
