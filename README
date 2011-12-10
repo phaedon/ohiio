@@ -21,3 +21,39 @@ performance. In addition, it is released under the BSD license.
 
 The goal of this project is to access the power and speed of OIIO from Haskell.
 
+
+Installation (OSX)
+------------------
+In Xcode, create a new project, selecting:
+        "Mac OSX" -> "Framework & Library" -> "C/C++ Library".
+
+Add ohiio.h and ohiio.cpp from this repository.
+
+After properly building OIIO on your system, locate libOpenImageIO.dylib 
+(probably in your oiio/dist/macosx/lib/ directory) and add it to the 
+Xcode target.
+
+Also add all of the OIIO headers (oiio/src/include/) to the Xcode project.
+
+After successfully building this Xcode project, you'll need to locate the 
+dynamic library you just created. That is most likely located in:
+
+   yourxcodeproject/DerivedData/ohiio/Build/Products/Debug/libohiio.dylib
+
+Next, take this full path and place it in the file "ohiio.cabal", in the 
+"extra-lib-dirs" field (replace the path that's currently there).
+
+Finally, "cabal install" will build and install the Haskell libraries.
+Load GHCI into your shell and type "import OhiioBindings". If there is no
+error, the installation was successful.
+
+
+Installation (Linux)
+--------------------
+No makefile is currently provided.
+
+
+Installation (Windows)
+----------------------
+Not currently supported.
+
